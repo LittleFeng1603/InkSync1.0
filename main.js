@@ -167,6 +167,7 @@ class InkSyncLiteController {
     this.host.append(this.toolbar, this.palettePanel, this.canvas);
     this.contentEl.appendChild(this.host);
     this.contentEl.classList.add("has-inksync-lite");
+    this.installHeaderButton();
     this.buildToolbar();
     this.buildPalette();
     this.onPointerDown = this.onPointerDown.bind(this);
@@ -190,10 +191,6 @@ class InkSyncLiteController {
   }
 
   buildToolbar() {
-    this.toggleButton = this.createButton("pencil", "InkSync Lite", () => {
-      this.active = !this.active;
-      this.applySettings();
-    });
     this.drawButton = this.createButton("pencil", "铅笔", () => {
       this.active = true;
       this.toolMode = TOOL_DRAW;
@@ -210,6 +207,31 @@ class InkSyncLiteController {
       this.applySettings();
     });
     this.drawButton.classList.add("inksync-brush-button");
+  }
+
+  installHeaderButton() {
+    this.view?.containerEl?.querySelectorAll(".inksync-lite-header-button").forEach((button) => button.remove());
+    const onClick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      this.active = !this.active;
+      if (!this.active) this.paletteOpen = false;
+      this.applySettings();
+    };
+    if (typeof this.view?.addAction === "function") {
+      this.headerButton = this.view.addAction("wand-sparkles", "InkSync Lite", onClick);
+    }
+    if (!this.headerButton) {
+      const actions = this.view?.containerEl?.querySelector(".view-actions");
+      this.headerButton = document.createElement("div");
+      this.headerButton.className = "clickable-icon view-action";
+      this.headerButton.setAttribute("aria-label", "InkSync Lite");
+      this.headerButton.setAttribute("title", "InkSync Lite");
+      setIcon(this.headerButton, "wand-sparkles");
+      this.headerButton.addEventListener("click", onClick);
+      if (actions) actions.appendChild(this.headerButton);
+    }
+    this.headerButton?.classList.add("inksync-lite-header-button", "inksync-header-button");
   }
 
   buildPalette() {
@@ -308,7 +330,7 @@ class InkSyncLiteController {
     this.host.classList.toggle("is-drawing-active", this.active);
     this.host.classList.toggle("is-palette-open", this.paletteOpen);
     this.host.classList.toggle("is-eraser-mode", this.toolMode === TOOL_ERASER);
-    this.toggleButton.classList.toggle("is-active", this.active);
+    this.headerButton?.classList.toggle("is-active", this.active);
     this.drawButton.classList.toggle("is-active", this.active && this.toolMode === TOOL_DRAW);
     this.drawButton.classList.toggle("is-brush-color-active", this.active && this.toolMode === TOOL_DRAW);
     this.eraserButton.classList.toggle("is-active", this.active && this.toolMode === TOOL_ERASER);
@@ -449,6 +471,7 @@ class InkSyncLiteController {
     window.removeEventListener("pointerup", this.onPointerUp);
     window.removeEventListener("resize", this.resize);
     this.contentEl.removeEventListener("scroll", this.render);
+    this.headerButton?.remove();
     this.host.remove();
     this.contentEl.classList.remove("has-inksync-lite");
   }
