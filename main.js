@@ -30,7 +30,7 @@ module.exports = class InkSyncPlugin extends Plugin {
     this.registerEvent(this.app.workspace.on("layout-change", this.refresh));
     this.registerEvent(this.app.workspace.on("active-leaf-change", this.refresh));
     this.registerEvent(this.app.workspace.on("file-open", this.refresh));
-    this.registerInterval(window.setInterval(this.refresh, 1200));
+    this.registerInterval(window.setInterval(this.refresh, 5000));
     this.refresh();
   }
 
@@ -154,6 +154,8 @@ class InkSyncController {
     this.paletteOpen = false;
     this.drawing = false;
     this.currentStroke = null;
+    this.pendingExtraStrokes = [];
+    this.renderFrameId = 0;
     this.lastFileKey = "";
     this.host = document.createElement("div");
     this.host.className = "inksync-shell is-inksync-controls-visible";
@@ -175,11 +177,12 @@ class InkSyncController {
     this.onPointerUp = this.onPointerUp.bind(this);
     this.resize = this.resize.bind(this);
     this.render = this.render.bind(this);
+    this.scheduleRender = this.scheduleRender.bind(this);
     this.canvas.addEventListener("pointerdown", this.onPointerDown);
     window.addEventListener("pointermove", this.onPointerMove, { passive: false });
     window.addEventListener("pointerup", this.onPointerUp);
     window.addEventListener("resize", this.resize);
-    this.contentEl.addEventListener("scroll", this.render, { passive: true });
+    this.contentEl.addEventListener("scroll", this.scheduleRender, { passive: true });
     this.resize();
     this.render();
   }
@@ -372,7 +375,7 @@ class InkSyncController {
       "--inksync-brush-preview-opacity": settings.opacity,
       "--inksync-brush-preview-width": `${Math.max(2, settings.width)}px`
     });
-    this.render();
+    this.scheduleRender();
   }
 
   resize() {
@@ -384,7 +387,7 @@ class InkSyncController {
     this.canvas.height = Math.max(1, Math.round(rect.height * ratio));
     this.ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     this.positionControls();
-    this.render();
+    this.scheduleRender();
   }
 
   positionControls() {
@@ -415,14 +418,14 @@ class InkSyncController {
       opacity: settings.opacity,
       points: [point]
     };
-    this.render([this.currentStroke]);
+    this.scheduleRender([this.currentStroke]);
   }
 
   onPointerMove(event) {
     if (!this.drawing || !this.active || !this.currentStroke) return;
     event.preventDefault();
     this.currentStroke.points.push(this.eventPoint(event));
-    this.render([this.currentStroke]);
+    this.scheduleRender([this.currentStroke]);
   }
 
   async onPointerUp() {
@@ -434,7 +437,7 @@ class InkSyncController {
       await this.plugin.setDrawingData(this.view.file, data);
     }
     this.currentStroke = null;
-    this.render();
+    this.scheduleRender();
   }
 
   eventPoint(event) {
@@ -451,8 +454,22 @@ class InkSyncController {
     data.strokes = data.strokes.filter((stroke) => !stroke.points?.some((item) => distance(point, item) <= this.plugin.settings.eraserWidth));
     if (data.strokes.length !== before) {
       await this.plugin.setDrawingData(this.view.file, data);
-      this.render();
+      this.scheduleRender();
     }
+  }
+
+  scheduleRender(extra = []) {
+    this.pendingExtraStrokes = extra;
+    if (this.renderFrameId) return;
+    this.renderFrameId = window.requestAnimationFrame?.(() => {
+      this.renderFrameId = 0;
+      this.render(this.pendingExtraStrokes);
+      this.pendingExtraStrokes = [];
+    }) || window.setTimeout(() => {
+      this.renderFrameId = 0;
+      this.render(this.pendingExtraStrokes);
+      this.pendingExtraStrokes = [];
+    }, 16);
   }
 
   render(extra = []) {
@@ -490,7 +507,12 @@ class InkSyncController {
     window.removeEventListener("pointermove", this.onPointerMove);
     window.removeEventListener("pointerup", this.onPointerUp);
     window.removeEventListener("resize", this.resize);
-    this.contentEl.removeEventListener("scroll", this.render);
+    this.contentEl.removeEventListener("scroll", this.scheduleRender);
+    if (this.renderFrameId) {
+      window.cancelAnimationFrame?.(this.renderFrameId);
+      window.clearTimeout?.(this.renderFrameId);
+      this.renderFrameId = 0;
+    }
     this.headerButton?.remove();
     this.host.remove();
     this.contentEl.classList.remove("has-inksync-basic");
