@@ -1,9 +1,9 @@
 {
-  "id": "inksync-lite",
-  "name": "InkSync Lite",
+  "id": "inksync",
+  "name": "InkSync",
   "version": "1.0.1",
   "minAppVersion": "1.5.0",
-  "description": "InkSync Lite: pencil, eraser, color, and upgrade support.",
+  "description": "InkSync 1.0.1: pencil, eraser, color, and upgrade support.",
   "author": "Jensen Feng",
   "authorUrl": "",
   "isDesktopOnly": false

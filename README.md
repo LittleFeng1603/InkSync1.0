@@ -1,6 +1,6 @@
-# InkSync Lite 1.0.1
+# InkSync 1.0.1
 
-InkSync Lite keeps the familiar InkSync toolbar style while only shipping the basic drawing tools.
+InkSync 1.0.1 keeps the familiar InkSync toolbar style while only shipping the basic drawing tools.
 
 ## Features
 
@@ -10,4 +10,4 @@ InkSync Lite keeps the familiar InkSync toolbar style while only shipping the ba
 - Local drawing persistence per note
 - Upgrade entry in settings
 
-The Lite package does not include layout shift recognition, PDF drawing, multiple brush engines, text tools, selection tools, automatic layout baselines, or the full InkSync feature code.
+This 1.0.1 package does not include layout shift recognition, PDF drawing, multiple brush engines, text tools, selection tools, automatic layout baselines, or the full InkSync feature code.

@@ -1,7 +1,7 @@
 const { Plugin, PluginSettingTab, Setting, Notice, MarkdownView, requestUrl, setIcon } = require("obsidian");
 
-const PLUGIN_ID = "inksync-lite";
-const PLUGIN_NAME = "InkSync Lite";
+const PLUGIN_ID = "inksync";
+const PLUGIN_NAME = "InkSync";
 const FULL_PLUGIN_ID = "inksync";
 const TOOL_DRAW = "draw";
 const TOOL_ERASER = "eraser";
@@ -21,12 +21,12 @@ const DEFAULT_SETTINGS = {
   drawings: {}
 };
 
-module.exports = class InkSyncLitePlugin extends Plugin {
+module.exports = class InkSyncPlugin extends Plugin {
   async onload() {
     this.settings = normalizeSettings(await this.loadData());
     this.controllers = new Map();
     this.refresh = this.refresh.bind(this);
-    this.addSettingTab(new InkSyncLiteSettingTab(this.app, this));
+    this.addSettingTab(new InkSyncSettingTab(this.app, this));
     this.registerEvent(this.app.workspace.on("layout-change", this.refresh));
     this.registerEvent(this.app.workspace.on("active-leaf-change", this.refresh));
     this.registerEvent(this.app.workspace.on("file-open", this.refresh));
@@ -52,7 +52,7 @@ module.exports = class InkSyncLitePlugin extends Plugin {
       if (this.controllers.has(contentEl)) {
         this.controllers.get(contentEl).setView(view);
       } else {
-        this.controllers.set(contentEl, new InkSyncLiteController(this, view, contentEl));
+        this.controllers.set(contentEl, new InkSyncController(this, view, contentEl));
       }
     }
     for (const [contentEl, controller] of this.controllers.entries()) {
@@ -144,7 +144,7 @@ module.exports = class InkSyncLitePlugin extends Plugin {
   }
 };
 
-class InkSyncLiteController {
+class InkSyncController {
   constructor(plugin, view, contentEl) {
     this.plugin = plugin;
     this.view = view;
@@ -166,7 +166,7 @@ class InkSyncLiteController {
     this.ctx = this.canvas.getContext("2d");
     this.host.append(this.toolbar, this.palettePanel, this.canvas);
     this.contentEl.appendChild(this.host);
-    this.contentEl.classList.add("has-inksync-lite");
+    this.contentEl.classList.add("has-inksync-basic");
     this.installHeaderButton();
     this.buildToolbar();
     this.buildPalette();
@@ -210,7 +210,7 @@ class InkSyncLiteController {
   }
 
   installHeaderButton() {
-    this.view?.containerEl?.querySelectorAll(".inksync-lite-header-button").forEach((button) => button.remove());
+    this.view?.containerEl?.querySelectorAll(".inksync-basic-header-button").forEach((button) => button.remove());
     const onClick = (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -219,19 +219,19 @@ class InkSyncLiteController {
       this.applySettings();
     };
     if (typeof this.view?.addAction === "function") {
-      this.headerButton = this.view.addAction("wand-sparkles", "InkSync Lite", onClick);
+      this.headerButton = this.view.addAction("wand-sparkles", PLUGIN_NAME, onClick);
     }
     if (!this.headerButton) {
       const actions = this.view?.containerEl?.querySelector(".view-actions");
       this.headerButton = document.createElement("div");
       this.headerButton.className = "clickable-icon view-action";
-      this.headerButton.setAttribute("aria-label", "InkSync Lite");
-      this.headerButton.setAttribute("title", "InkSync Lite");
+      this.headerButton.setAttribute("aria-label", PLUGIN_NAME);
+      this.headerButton.setAttribute("title", PLUGIN_NAME);
       setIcon(this.headerButton, "wand-sparkles");
       this.headerButton.addEventListener("click", onClick);
       if (actions) actions.appendChild(this.headerButton);
     }
-    this.headerButton?.classList.add("inksync-lite-header-button", "inksync-header-button");
+    this.headerButton?.classList.add("inksync-basic-header-button", "inksync-header-button");
   }
 
   buildPalette() {
@@ -473,18 +473,18 @@ class InkSyncLiteController {
     this.contentEl.removeEventListener("scroll", this.render);
     this.headerButton?.remove();
     this.host.remove();
-    this.contentEl.classList.remove("has-inksync-lite");
+    this.contentEl.classList.remove("has-inksync-basic");
   }
 }
 
-class InkSyncLiteSettingTab extends PluginSettingTab {
+class InkSyncSettingTab extends PluginSettingTab {
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "InkSync Lite 1.0.1" });
+    containerEl.createEl("h2", { text: "InkSync 1.0.1" });
     new Setting(containerEl)
       .setName("当前版本")
-      .setDesc("InkSync Lite 1.0.1");
+      .setDesc("InkSync 1.0.1");
     new Setting(containerEl)
       .setName("更新入口")
       .setDesc("输入升级密钥后可下载完整版 InkSync，解锁笔记跟随、四种笔刷、PDF 绘图、自动布局基准、文字/选择工具和更多绘图增强。")
