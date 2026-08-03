@@ -464,7 +464,7 @@ class InkSyncLiteSettingTab extends PluginSettingTab {
       .setDesc("InkSync Lite 1.0.0");
     new Setting(containerEl)
       .setName("更新入口")
-      .setDesc("输入升级密钥后可下载完整版 InkSync。")
+      .setDesc("输入升级密钥后可下载完整版 InkSync，解锁笔记跟随、四种笔刷、PDF 绘图、自动布局基准、文字/选择工具和更多绘图增强。")
       .addText((text) => text
         .setPlaceholder("升级密钥")
         .setValue(this.plugin.settings.upgradeKey)
