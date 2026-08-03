@@ -1,9 +1,9 @@
 {
-  "id": "inksync",
-  "name": "InkSync",
+  "id": "inksync-lite",
+  "name": "InkSync Lite",
   "version": "1.0.0",
   "minAppVersion": "1.5.0",
-  "description": "A lightweight ink layer for Obsidian notes.",
+  "description": "InkSync Lite: pencil, eraser, color, and upgrade support.",
   "author": "Jensen Feng",
   "authorUrl": "",
   "isDesktopOnly": false
