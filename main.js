@@ -481,10 +481,10 @@ class InkSyncLiteSettingTab extends PluginSettingTab {
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "InkSync Lite 1.0.0" });
+    containerEl.createEl("h2", { text: "InkSync Lite 1.0.1" });
     new Setting(containerEl)
       .setName("当前版本")
-      .setDesc("InkSync Lite 1.0.0");
+      .setDesc("InkSync Lite 1.0.1");
     new Setting(containerEl)
       .setName("更新入口")
       .setDesc("输入升级密钥后可下载完整版 InkSync，解锁笔记跟随、四种笔刷、PDF 绘图、自动布局基准、文字/选择工具和更多绘图增强。")

@@ -1,4 +1,4 @@
-# InkSync Lite 1.0.0
+# InkSync Lite 1.0.1
 
 InkSync Lite keeps the familiar InkSync toolbar style while only shipping the basic drawing tools.
 
