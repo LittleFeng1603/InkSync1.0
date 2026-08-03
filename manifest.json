@@ -1,0 +1,10 @@
+{
+  "id": "inksync",
+  "name": "InkSync",
+  "version": "1.0.0",
+  "minAppVersion": "1.5.0",
+  "description": "A lightweight ink layer for Obsidian notes.",
+  "author": "Jensen Feng",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}
