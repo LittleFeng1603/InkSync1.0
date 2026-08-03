@@ -235,9 +235,15 @@ class InkSyncController {
   }
 
   buildPalette() {
+    const colorRow = document.createElement("div");
+    colorRow.className = "inksync-palette-row inksync-color-row";
+    const colorIcon = document.createElement("span");
+    colorIcon.className = "inksync-palette-icon";
+    setIcon(colorIcon, "palette");
     this.colorGrid = document.createElement("div");
     this.colorGrid.className = "inksync-color-grid";
-    this.palettePanel.appendChild(this.colorGrid);
+    colorRow.append(colorIcon, this.colorGrid);
+    this.palettePanel.appendChild(colorRow);
     this.colorButtons = [];
     for (let index = 0; index < 2; index += 1) {
       const button = document.createElement("button");
@@ -253,6 +259,19 @@ class InkSyncController {
       this.colorGrid.appendChild(button);
       this.colorButtons.push(button);
     }
+    this.saveColorButton = document.createElement("button");
+    this.saveColorButton.type = "button";
+    this.saveColorButton.className = "inksync-color-save";
+    this.saveColorButton.title = "保存当前颜色";
+    this.saveColorButton.setAttribute("aria-label", "保存当前颜色");
+    setIcon(this.saveColorButton, "plus");
+    this.saveColorButton.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      this.plugin.settings.savedColors = saveCurrentColor(this.plugin.settings.color, this.plugin.settings.savedColors);
+      await this.plugin.saveSettings();
+    });
+    this.colorGrid.appendChild(this.saveColorButton);
     this.advancedColorButton = document.createElement("button");
     this.advancedColorButton.type = "button";
     this.advancedColorButton.className = "inksync-color-advanced";
@@ -263,7 +282,6 @@ class InkSyncController {
     this.colorInput.type = "color";
     this.colorInput.addEventListener("input", async () => {
       this.plugin.settings.color = this.colorInput.value;
-      this.plugin.settings.savedColors = [this.colorInput.value, this.plugin.settings.savedColors[1] || "#111827"].slice(0, 2);
       await this.plugin.saveSettings();
     });
     this.advancedColorButton.addEventListener("click", () => this.colorInput.click());
@@ -347,6 +365,8 @@ class InkSyncController {
       setProps(button, { "--inksync-swatch-color": color });
       button.classList.toggle("is-active", color.toLowerCase() === settings.color.toLowerCase());
     });
+    const saved = settings.savedColors.map((color) => color.toLowerCase());
+    this.advancedColorButton.classList.toggle("is-active", !saved.includes(settings.color.toLowerCase()));
     setProps(this.previewStroke, {
       "--inksync-brush-preview-color": settings.color,
       "--inksync-brush-preview-opacity": settings.opacity,
@@ -578,6 +598,12 @@ function clamp(value, min, max) {
 
 function distance(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function saveCurrentColor(color, savedColors) {
+  if (!isColor(color)) return savedColors;
+  const normalized = color.toLowerCase();
+  return [color, ...savedColors.filter((item) => item.toLowerCase() !== normalized)].slice(0, 2);
 }
 
 function contrastTextColor(color) {
